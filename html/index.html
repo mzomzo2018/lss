@@ -6,6 +6,11 @@
     <title>Laptop Support System</title>
     <link rel="stylesheet" href="css/all.min.css">
     <style>
+        @font-face {
+            font-family: 'AdditionalFont1';
+            src: url('fonts/additionalFont1.ttf') format('truetype');
+        }
+
         :root {
             --primary-gradient: linear-gradient(135deg, #2B3467, #1A1F3D);
             --secondary-gradient: linear-gradient(135deg, #4E31AA, #2B3467);
@@ -17,7 +22,7 @@
 
         body {
             margin: 0;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'AdditionalFont1', sans-serif;
             background: var(--primary-gradient);
             min-height: 100vh;
             padding-bottom: 60px;
@@ -189,6 +194,7 @@
             gap: 1rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             transform-style: preserve-3d;
+            font-family: 'AdditionalFont1', sans-serif;
         }
 
         .optimize-btn {

@@ -9,6 +9,7 @@ class Laptop:
         self._ram = ""
         self._storage = ""
         self._storage_type = ""
+        self._drivers = []
 
     # Manufacturer property
     @property
@@ -91,3 +92,11 @@ class Laptop:
     def storage_type(self, value):
         self._storage_type = value
 
+    # Drivers property
+    @property
+    def drivers(self):
+        return self._drivers
+
+    @drivers.setter
+    def drivers(self, value):
+        self._drivers = value
