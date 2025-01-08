@@ -158,41 +158,12 @@
             box-sizing: border-box;
         }
 
-        .form-group select {
-            width: 100%;
-            padding: 1.2rem;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-            height: 4.5rem;
-            box-sizing: border-box;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 2rem;
-            padding-right: 3rem;
-        }
-
         .form-group input:focus {
             background: rgba(255,255,255,0.15);
             border-color: var(--text-secondary);
             outline: none;
             transform: translateZ(5px);
             height: 3.8rem;
-        }
-
-        .form-group select:focus {
-            background-color: rgba(255,255,255,0.15);
-            border-color: var(--text-secondary);
-            outline: none;
-            transform: translateZ(5px);
-            height: 4.8rem;
         }
 
         .form-section {
@@ -350,30 +321,17 @@
                 
                 <div class="form-group">
                     <label><i class="fas fa-building"></i> Laptop Manufacturer</label>
-                    <select id="manufacturer" required>
-                        <option value="">Select Manufacturer</option>
-                        <option value="dell">Dell</option>
-                        <option value="hp">HP</option>
-                        <option value="lenovo">Lenovo</option>
-                        <option value="asus">Asus</option>
-                        <option value="acer">Acer</option>
-                    </select>
+                    <input type="text" id="manufacturer" required>
                 </div>
 
                 <div class="form-group">
                     <label><i class="fas fa-laptop-code"></i> Laptop Model Family</label>
-                    <select id="modelFamily" required>
-                        <option value="">Select Model Family</option>
-                        <!-- Options will be populated based on manufacturer -->
-                    </select>
+                    <input type="text" id="modelFamily" required>
                 </div>
 
                 <div class="form-group">
                     <label><i class="fas fa-tag"></i> Laptop Model</label>
-                    <select id="model" required>
-                        <option value="">Select Model</option>
-                        <!-- Options will be populated based on model family -->
-                    </select>
+                    <input type="text" id="model" required>
                 </div>
 
                 <div class="form-group">
@@ -505,19 +463,14 @@
         }
 
         function autofillForm(laptopInfo) {
-            // Fill manufacturer info
             document.getElementById('manufacturer').value = laptopInfo.manufacturer.toLowerCase();
             document.getElementById('modelFamily').value = laptopInfo.modelFamily || '';
             document.getElementById('model').value = laptopInfo.model || '';
-            
-            // Fill hardware info
             document.getElementById('cpu').value = laptopInfo.cpu || '';
             document.getElementById('gpu').value = laptopInfo.gpu || '';
             document.getElementById('dedicatedGpu').value = laptopInfo.dedicatedGpu || '';
             document.getElementById('ram').value = laptopInfo.ram || '';
             document.getElementById('storage').value = laptopInfo.storage || '';
-            
-            // Set current date as manufacturing date
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('manufactureDate').value = today;
         }

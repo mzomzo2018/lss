@@ -294,7 +294,6 @@
     </style>
 </head>
 <body>
-    <!-- Rest of the HTML code remains the same -->
     <nav class="navbar">
         <div class="title">Laptop Support System</div>
         <a href="contribute.html" class="contribute-btn">
@@ -382,7 +381,6 @@
         </button>
     </div>
 
-    <!-- Rest of the HTML and Script remains the same -->
     <div id="optimizeModal" class="modal">
         <div class="modal-content">
             <h2><i class="fas fa-cog fa-spin"></i> Optimizing PC...</h2>
@@ -424,22 +422,16 @@
     </footer>
 
     <script>
-        // Function to update PC specifications
         function updatePCSpecs(specs) {
-            // Manufacturer Data
             document.getElementById('manufacturerName').textContent = specs.manufacturer || '';
             document.getElementById('modelFamily').textContent = specs.modelFamily || '';
             document.getElementById('model').textContent = specs.model || '';
             document.getElementById('productionDate').textContent = specs.productionDate || '';
-
-            // Hardware Information
             document.getElementById('cpu').textContent = specs.cpu || '';
             document.getElementById('integratedGpu').textContent = specs.integratedGpu || '';
             document.getElementById('dedicatedGpu').textContent = specs.dedicatedGpu || '';
             document.getElementById('ram').textContent = specs.ram || '';
             document.getElementById('storage').textContent = specs.storage || '';
-
-            // Software Information
             document.getElementById('windowsVersion').textContent = specs.windowsVersion || '';
             document.getElementById('buildVersion').textContent = specs.buildVersion || '';
         }

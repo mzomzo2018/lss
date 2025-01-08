@@ -1,4 +1,3 @@
-# This Python file uses the following encoding: utf-8
 import decimal
 import sqlite3
 import sys
@@ -19,16 +18,12 @@ from PySide6.QtWebEngineCore import QWebEngineSettings
 
 from Driver import Driver
 from UserDetails import UserDetails
+from Laptop import Laptop
 
-# Important:
-# You need to run the following command to generate the ui_form.py file
-#     pyside6-uic form.ui -o ui_form.py, or
-#     pyside2-uic form.ui -o ui_form.py
 from ui_mainwindow import Ui_MainWindow
 
 
 def format_size(size_bytes):
-    """Convert bytes to human readable string with appropriate unit"""
     for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
         if size_bytes < 1024:
             return f"{size_bytes:.2f} {unit}"
@@ -56,37 +51,16 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == '/optimize':
-
-            # Run various optimization processes
             try:
-                # Run system file checker
                 os.system('sfc /scannow')
-                
-                # Run disk check
-                os.system('chkdsk /f')
-                
-                # Clean up system files
                 os.system('cleanmgr /sagerun:1')
-                
-                # Defragment drives 
                 os.system('defrag C: /O')
-                
-                # Check disk health
-                os.system('wmic diskdrive get status')
-                
-                # Clear temp files
                 os.system('del /s /q %temp%\\*.*')
-                
-                # Reset Windows Update components
                 os.system('net stop wuauserv')
                 os.system('net stop cryptSvc')
                 os.system('net stop bits')
                 os.system('net stop msiserver')
-                
-                # Flush DNS cache
                 os.system('ipconfig /flushdns')
-                
-                # Clear Windows Store cache
                 os.system('wsreset')
                 
                 self._send_response(200, {'message': 'Optimization completed successfully'})
@@ -94,16 +68,13 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self._send_response(500, {'error': str(e)})
         elif self.path == '/detectDrivers':
             try:
-                # Query WMI for installed drivers using wmi library
                 import wmi
                 w = wmi.WMI()
                 installed_drivers = w.Win32_PnPSignedDriver()
 
-                # Connect to SQLite DB
                 conn = sqlite3.connect('drivers.db')
                 cursor = conn.cursor()
 
-                # Get available drivers from DB and compare versions
                 available_drivers = []
                 for installed in installed_drivers:
                     cursor.execute("""
@@ -137,20 +108,16 @@ class RequestHandler(BaseHTTPRequestHandler):
                     total_drivers = len(self.selected_drivers)
 
                     progress_per_driver = 100 / total_drivers
-                    
-                    # Get current driver index based on progress
                     current_driver_index = int(self.current_progress / progress_per_driver)
                     
                     if current_driver_index < total_drivers:
                         driver = self.selected_drivers[current_driver_index]
                         driver_path = os.path.join('drivers', f"{driver['name']}.exe")
                         
-                        # Execute driver installation silently
                         if os.path.exists(driver_path):
                             os.system(f'"{driver_path}" /S')
                             self.current_progress = (current_driver_index + 1) * progress_per_driver
                     
-                    # Check if installation is complete
                     if self.current_progress >= 100:
                         self.installation_in_progress = False
                         self.current_progress = 100
@@ -167,7 +134,6 @@ class RequestHandler(BaseHTTPRequestHandler):
             else:
                 self._send_response(200, {'progress': 0})
         else:
-            # Serve static files
             try:
                 file_path = os.path.join(os.path.dirname(__file__), self.path.lstrip('/'))
                 if os.path.exists(file_path) and os.path.isfile(file_path):
@@ -189,11 +155,9 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         if self.path == '/registerLaptop':
             try:
-                # Connect to SQLite database
                 conn = sqlite3.connect('laptops.db')
                 cursor = conn.cursor()
 
-                # Create table if it doesn't exist
                 cursor.execute('''CREATE TABLE IF NOT EXISTS laptops (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     manufacturer TEXT,
@@ -211,26 +175,33 @@ class RequestHandler(BaseHTTPRequestHandler):
                     email TEXT
                 )''')
 
-                # Create user details
                 user = UserDetails()
                 user.set_username(post_data.get('username', ''))
                 user.set_email(post_data.get('email', ''))
 
-                # Insert laptop data with user details
+                laptop = Laptop()
+                laptop.model_family = post_data.get('modelFamily')
+                laptop.model = post_data.get('model')
+                laptop.cpu = post_data.get('cpu')
+                laptop.integrated_gpu = post_data.get('integratedGpu')
+                laptop.dedicated_gpu = post_data.get('dedicatedGpu')
+                laptop.ram = post_data.get('ram')
+                laptop.storage = post_data.get('storage')
+
                 cursor.execute('''INSERT INTO laptops (
                     manufacturer, model_family, model, production_date,
                     cpu, integrated_gpu, dedicated_gpu, ram, storage,
                     windows_version, build_version, username, email
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (
                     post_data.get('manufacturer'),
-                    post_data.get('modelFamily'),
-                    post_data.get('model'),
+                    laptop.model_family,
+                    laptop.model,
                     post_data.get('productionDate'),
-                    post_data.get('cpu'),
-                    post_data.get('integratedGpu'),
-                    post_data.get('dedicatedGpu'),
-                    post_data.get('ram'),
-                    post_data.get('storage'),
+                    laptop.cpu,
+                    laptop.integrated_gpu,
+                    laptop.dedicated_gpu,
+                    laptop.ram,
+                    laptop.storage,
                     post_data.get('windowsVersion'),
                     post_data.get('buildVersion'),
                     user.get_username(),
@@ -296,18 +267,28 @@ class MainWindow(QMainWindow):
         ram_sizes = [format_size(int(x.Capacity)) for x in win32_memory_object]
         storage_sizes = [f"{format_size(int(x.Size))} {detect_media_type(int(x.MediaType))}"
                        for x in win32_storage_object]
+
+        laptop = Laptop()
+        laptop.manufacturer = str(win32_cs_object.Manufacturer).title()
+        laptop.model_family = " ".join(str(win32_cs_object.SystemFamily).split()[:-1:1])
+        laptop.model = str(win32_cs_object.Model)
+        laptop.cpu = f"{win32_processor_object.Name} {round(win32_processor_object.CurrentClockSpeed / 1000, 2)} GHz {win32_processor_object.NumberOfCores} cores"
+        laptop.integrated_gpu = f"{win32_gpu_object[0].Caption} {integrated_gpu_ram}"
+        laptop.dedicated_gpu = dedicated_gpu
+        laptop.ram = f"{' + '.join(ram_sizes)} {win32_memory_object[0].ConfiguredClockSpeed} MHz"
+        laptop.storage = ' + '.join(storage_sizes)
+
         if "index.htm" in url:
             pc_specs = {
-                'manufacturer': str(win32_cs_object.Manufacturer).title(),
-                'modelFamily': " ".join(str(win32_cs_object.SystemFamily).split()[:-1:1]),
-                'model': str(win32_cs_object.Model),
+                'manufacturer': laptop.manufacturer,
+                'modelFamily': laptop.model_family,
+                'model': laptop.model,
                 'productionDate': '-',
-                'cpu': f"{win32_processor_object.Name} "
-                      f"{round(win32_processor_object.CurrentClockSpeed / 1000, 2)} GHz {win32_processor_object.NumberOfCores} cores",
-                'integratedGpu': f"{win32_gpu_object[0].Caption} {integrated_gpu_ram}",
-                'dedicatedGpu': dedicated_gpu,
-                'ram': f"{' + '.join(ram_sizes)} {win32_memory_object[0].ConfiguredClockSpeed} MHz",
-                'storage': ' + '.join(storage_sizes),
+                'cpu': laptop.cpu,
+                'integratedGpu': laptop.integrated_gpu,
+                'dedicatedGpu': laptop.dedicated_gpu,
+                'ram': laptop.ram,
+                'storage': laptop.storage,
                 'windowsVersion': win32_os_object.Caption,
                 'buildVersion': (f"{win32_os_object.BuildNumber} "
                                f"{win32_os_object.OSArchitecture}")
@@ -317,17 +298,16 @@ class MainWindow(QMainWindow):
             
         elif "contribute.html" in url:
             laptop_info = {
-                'manufacturer': str(win32_cs_object.Manufacturer).title(),
-                'modelFamily': " ".join(str(win32_cs_object.SystemFamily).split()[:-1:1]),
-                'model': str(win32_cs_object.Model),
+                'manufacturer': laptop.manufacturer,
+                'modelFamily': laptop.model_family,
+                'model': laptop.model,
                 'productionDate': '-',
-                'cpu': f"{win32_processor_object.Name} {round(win32_processor_object.CurrentClockSpeed / 1000, 2)} GHz {win32_processor_object.NumberOfCores} cores",
-                'gpu': f"{win32_gpu_object[0].Caption} {integrated_gpu_ram}",
-                'dedicatedGpu': dedicated_gpu,
-                'ram': f"{' + '.join(ram_sizes)} {win32_memory_object[0].ConfiguredClockSpeed} MHz",
-                'storage': ' + '.join(storage_sizes),
+                'cpu': laptop.cpu,
+                'gpu': laptop.integrated_gpu,
+                'dedicatedGpu': laptop.dedicated_gpu,
+                'ram': laptop.ram,
+                'storage': laptop.storage,
             }
-
                 
             self.ui.webEngineView.page().runJavaScript(f"autofillForm({laptop_info});")
 
