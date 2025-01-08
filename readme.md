@@ -25,6 +25,8 @@
 - `index.htm`: Main page displaying system specifications retrieved from WMI queries.
 
 - `contribute.html`: Form page for users to contribute laptop information, with autofill capabilities from system data.
+  
+- `drivers.html`: Displays drivers to be installed using automatic or manual installation.
 
 ### Static Files
 
