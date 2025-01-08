@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Installation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #2B3467, #1A1F3D);
+            --secondary-gradient: linear-gradient(135deg, #4E31AA, #2B3467);
+            --accent-gradient: linear-gradient(135deg, #BAD7E9, #FCFFE7);
+            --text-primary: #FCFFE7;
+            --text-secondary: #BAD7E9;
+            --card-bg: rgba(43, 52, 103, 0.5);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            padding-bottom: 60px;
+            position: relative;
+            color: var(--text-primary);
+            perspective: 1000px;
+        }
+
+        .navbar {
+            background: var(--primary-gradient);
+            padding: 1.2rem 2rem;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            animation: navbarSlideDown 0.5s ease-out;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+
+        .back-btn {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            margin-right: 1rem;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-5px) translateZ(20px);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            animation: titlePop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            animation: containerRise 0.8s ease-out;
+            transform-style: preserve-3d;
+        }
+
+        @keyframes containerRise {
+            from { 
+                transform: translateY(50px) rotateX(-10deg);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0) rotateX(0);
+                opacity: 1;
+            }
+        }
+
+        .drivers-list {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease;
+        }
+
+        .drivers-list:hover {
+            transform: translateZ(20px);
+        }
+
+        .driver-item {
+            display: grid;
+            grid-template-columns: auto 2fr 1fr 1fr 1fr;
+            padding: 1.2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            color: var(--text-primary);
+            transform-style: preserve-3d;
+        }
+
+        .driver-item:hover:not(:first-child) {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.02) translateZ(10px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .driver-item:first-child {
+            font-weight: bold;
+            background: var(--secondary-gradient);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            cursor: default;
+            transform: translateZ(15px);
+        }
+
+        .driver-item.selected {
+            background: rgba(78, 49, 170, 0.3);
+            border-left: 4px solid #4E31AA;
+            transform: scale(1.02) translateZ(20px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .driver-icon {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transform: translateZ(25px);
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            transform-style: preserve-3d;
+        }
+
+        .action-btn {
+            background: var(--secondary-gradient);
+            color: var(--text-primary);
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px) translateZ(20px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+            perspective: 1000px;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: var(--text-primary);
+            backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        @keyframes modalPop {
+            from { 
+                transform: scale(0.8) rotateX(-20deg);
+                opacity: 0;
+            }
+            to { 
+                transform: scale(1) rotateX(0);
+                opacity: 1;
+            }
+        }
+
+        .progress {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+            transform: translateZ(10px);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-gradient);
+            transition: width 0.4s ease;
+        }
+
+        .warning-text {
+            color: #ff6b6b;
+            font-weight: bold;
+            margin: 1.5rem 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Rest of the HTML remains the same -->
+    <nav class="navbar">
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1 class="title" id="pageTitle">Detected Drivers</h1>
+    </nav>
+
+    <div class="container">
+        <div class="drivers-list" id="driversList">
+            <div class="driver-item">
+                <div></div>
+                <div>Driver Name</div>
+                <div>Current Version</div>
+                <div>Latest Version</div>
+                <div>Package Size</div>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button id="modeBtn" class="action-btn" onclick="toggleMode()">Manual Installation</button>
+            <button class="action-btn" onclick="showConfirmationDialog()">Start Installation</button>
+        </div>
+    </div>
+
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-info-circle"></i> Installation Details</h2>
+            <p id="downloadSize">Total download size: <span id="totalSize">0 MB</span></p>
+            <p id="estimatedTime">Estimated installation time: <span id="totalTime">0</span> minutes</p>
+            <div id="biosWarning" style="display: none;">
+                <p class="warning-text"><i class="fas fa-exclamation-triangle"></i> BIOS Update Warning</p>
+                <p>Please ensure your device is connected to a power source and do not turn off your device during the update.</p>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                <button onclick="closeConfirmationDialog()" class="action-btn">Cancel</button>
+                <button onclick="proceedWithInstallation()" class="action-btn">Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="installModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-cog fa-spin"></i> Installing drivers...</h2>
+            <p id="statusText">Status: Preparing installation</p>
+            <p id="progressText">0 of 3 installed</p>
+            <div class="progress">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <button onclick="cancelInstallation()" class="action-btn" style="margin-top: 1rem;">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript remains the same
+        let isManualMode = true;
+        let installationInProgress = false;
+        let currentProgress = 0;
+        let selectedDrivers = 0;
+        let totalDrivers = 0;
+
+        const driverData = [
+            {
+                icon: 'microchip',
+                name: 'NVIDIA Graphics Driver',
+                currentVersion: '472.12',
+                latestVersion: '528.49',
+                size: 756
+            },
+            {
+                icon: 'wifi',
+                name: 'Intel Wireless Driver',
+                currentVersion: '21.40.5',
+                latestVersion: '22.40.0',
+                size: 125
+            },
+            {
+                icon: 'volume-up',
+                name: 'Realtek Audio Driver',
+                currentVersion: '6.0.9225.1',
+                latestVersion: '6.0.9259.1',
+                size: 478
+            }
+        ];
+
+        function createDriverItem(driver) {
+            const div = document.createElement('div');
+            div.className = 'driver-item';
+            div.onclick = function() { toggleSelection(this); };
+            div.innerHTML = `
+                <i class="fas fa-${driver.icon} driver-icon"></i>
+                <div>${driver.name}</div>
+                <div>${driver.currentVersion}</div>
+                <div>${driver.latestVersion}</div>
+                <div>${driver.size} MB</div>
+            `;
+            return div;
+        }
+
+        function updateDriverList() {
+            const driversList = document.getElementById('driversList');
+            const header = driversList.firstElementChild;
+            driversList.innerHTML = '';
+            driversList.appendChild(header);
+
+            driverData.forEach(driver => {
+                driversList.appendChild(createDriverItem(driver));
+            });
+
+            totalDrivers = driverData.length;
+        }
+
+        window.addEventListener('DOMContentLoaded', updateDriverList);
+
+        function toggleSelection(element) {
+            element.classList.toggle('selected');
+            selectedDrivers = document.querySelectorAll('.driver-item.selected').length;
+        }
+
+        function toggleMode() {
+            isManualMode = !isManualMode;
+            const modeBtn = document.getElementById('modeBtn');
+            const pageTitle = document.getElementById('pageTitle');
+            const driverItems = document.querySelectorAll('.driver-item:not(:first-child)');
+            
+            if (isManualMode) {
+                modeBtn.textContent = 'Manual Installation';
+                pageTitle.textContent = 'Detected Drivers';
+            } else {
+                modeBtn.textContent = 'Automatic Installation';
+                pageTitle.textContent = 'PC Drivers';
+            }
+        }
+
+        function showConfirmationDialog() {
+            if (selectedDrivers === 0) {
+                alert('Please select at least one driver to install');
+                return;
+            }
+
+            const selectedItems = document.querySelectorAll('.driver-item.selected');
+            let totalSize = 0;
+            let hasBIOSUpdate = false;
+
+            selectedItems.forEach(item => {
+                const sizeText = item.lastElementChild.textContent;
+                const size = parseInt(sizeText);
+                totalSize += size;
+                if (item.textContent.toLowerCase().includes('bios')) {
+                    hasBIOSUpdate = true;
+                }
+            });
+
+            document.getElementById('totalSize').textContent = totalSize + ' MB';
+            document.getElementById('totalTime').textContent = Math.ceil(totalSize / 100);
+            document.getElementById('biosWarning').style.display = hasBIOSUpdate ? 'block' : 'none';
+            document.getElementById('confirmationModal').style.display = 'flex';
+        }
+
+        function closeConfirmationDialog() {
+            document.getElementById('confirmationModal').style.display = 'none';
+        }
+
+        function proceedWithInstallation() {
+            closeConfirmationDialog();
+            startInstallation();
+        }
+
+        function startInstallation() {
+            installationInProgress = true;
+            document.getElementById('installModal').style.display = 'flex';
+            currentProgress = 0;
+            updateProgress();
+        }
+
+        function updateProgress() {
+            if (!installationInProgress) return;
+            
+            currentProgress++;
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const statusText = document.getElementById('statusText');
+            const driversToInstall = selectedDrivers;
+            
+            progressBar.style.width = `${(currentProgress / driversToInstall) * 100}%`;
+            progressText.textContent = `${currentProgress} of ${driversToInstall} installed`;
+            
+            if (currentProgress < driversToInstall) {
+                statusText.textContent = `Status: Installing driver ${currentProgress + 1}`;
+                setTimeout(updateProgress, 2000);
+            } else {
+                statusText.textContent = 'Status: Installation complete';
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            }
+        }
+
+        function cancelInstallation() {
+            installationInProgress = false;
+            document.getElementById('installModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

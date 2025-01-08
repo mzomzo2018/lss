@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laptop Registration</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #2B3467, #1A1F3D);
+            --secondary-gradient: linear-gradient(135deg, #4E31AA, #2B3467);
+            --accent-gradient: linear-gradient(135deg, #BAD7E9, #FCFFE7);
+            --text-primary: #FCFFE7;
+            --text-secondary: #BAD7E9;
+            --card-bg: rgba(43, 52, 103, 0.5);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            padding-bottom: 60px;
+            position: relative;
+            color: var(--text-primary);
+            perspective: 1000px;
+        }
+
+        .navbar {
+            background: var(--primary-gradient);
+            padding: 1.5rem 2.5rem;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            animation: navbarSlideDown 0.5s ease-out;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+
+        @keyframes navbarSlideDown {
+            from {
+                transform: translateY(-100%) rotateX(90deg);
+            }
+            to {
+                transform: translateY(0) rotateX(0);
+            }
+        }
+
+        .back-btn {
+            color: var(--text-primary);
+            font-size: 1.4rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            margin-right: 1.5rem;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-5px) translateZ(20px);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            animation: titlePop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2.5rem auto;
+            padding: 0 1.5rem;
+            animation: containerRise 0.8s ease-out;
+            transform-style: preserve-3d;
+        }
+
+        @keyframes containerRise {
+            from {
+                transform: translateY(50px) rotateX(-10deg);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) rotateX(0);
+                opacity: 1;
+            }
+        }
+
+        .registration-form {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease;
+        }
+
+        .registration-form:hover {
+            transform: translateZ(20px);
+        }
+
+        .form-title {
+            color: var(--text-primary);
+            margin-bottom: 2.5rem;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: titleFloat 3s ease-in-out infinite;
+            font-size: 2.2rem;
+        }
+
+        .form-title i {
+            margin-right: 10px;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease;
+        }
+
+        .form-group:hover {
+            transform: translateZ(10px);
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            color: var(--text-secondary);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            font-size: 1.2rem;
+        }
+
+        .form-group label i {
+            margin-right: 8px;
+            font-size: 1.3rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1.2rem;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            height: 3.5rem;
+            box-sizing: border-box;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 1.2rem;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            height: 4.5rem;
+            box-sizing: border-box;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 2rem;
+            padding-right: 3rem;
+        }
+
+        .form-group input:focus {
+            background: rgba(255,255,255,0.15);
+            border-color: var(--text-secondary);
+            outline: none;
+            transform: translateZ(5px);
+            height: 3.8rem;
+        }
+
+        .form-group select:focus {
+            background-color: rgba(255,255,255,0.15);
+            border-color: var(--text-secondary);
+            outline: none;
+            transform: translateZ(5px);
+            height: 4.8rem;
+        }
+
+        .form-section {
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 1.4rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 10px;
+        }
+
+        .submit-btn {
+            background: var(--secondary-gradient);
+            color: var(--text-primary);
+            padding: 1.2rem 2.5rem;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .submit-btn i {
+            margin-right: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px) translateZ(10px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            perspective: 1000px;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            color: var(--text-primary);
+            transform-style: preserve-3d;
+            animation: modalPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes modalPop {
+            from {
+                transform: scale(0.8) rotateX(-20deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotateX(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-subtitle {
+            color: var(--text-secondary);
+            margin: 1.2rem 0;
+            font-size: 1.1rem;
+        }
+
+        .progress {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 1.2rem 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 100%;
+            background: var(--accent-gradient);
+            animation: progress 2s linear infinite;
+            transform-origin: left;
+        }
+
+        @keyframes progress {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .footer {
+            background: var(--primary-gradient);
+            color: var(--text-primary);
+            text-align: center;
+            padding: 1.2rem;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1 class="title"><i class="fas fa-laptop"></i> Laptop Registration</h1>
+    </nav>
+
+    <div class="container">
+        <form class="registration-form" onsubmit="handleSubmit(event)">
+            <h2 class="form-title"><i class="fas fa-clipboard-list"></i>Register Your Laptop</h2>
+            
+            <div class="form-section">
+                <h3 class="section-title"><i class="fas fa-user"></i>Personal Information</h3>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Owner Name</label>
+                    <input type="text" id="ownerName" required>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Owner Email</label>
+                    <input type="email" id="ownerEmail" required>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title"><i class="fas fa-industry"></i>Manufacturer Data</h3>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-building"></i> Laptop Manufacturer</label>
+                    <select id="manufacturer" required>
+                        <option value="">Select Manufacturer</option>
+                        <option value="dell">Dell</option>
+                        <option value="hp">HP</option>
+                        <option value="lenovo">Lenovo</option>
+                        <option value="asus">Asus</option>
+                        <option value="acer">Acer</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-laptop-code"></i> Laptop Model Family</label>
+                    <select id="modelFamily" required>
+                        <option value="">Select Model Family</option>
+                        <!-- Options will be populated based on manufacturer -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Laptop Model</label>
+                    <select id="model" required>
+                        <option value="">Select Model</option>
+                        <!-- Options will be populated based on model family -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-barcode"></i> Serial Number</label>
+                    <input type="text" id="serialNumber" required>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-alt"></i> Manufacturing Date</label>
+                    <input type="date" id="manufactureDate" required>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title"><i class="fas fa-microchip"></i>Hardware Information</h3>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-microchip"></i> CPU</label>
+                    <input type="text" id="cpu" required>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-desktop"></i> GPU</label>
+                    <input type="text" id="gpu" required>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-memory"></i> RAM</label>
+                    <input type="text" id="ram" required>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-hdd"></i> Storage</label>
+                    <input type="text" id="storage" required>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i>Register Laptop</button>
+        </form>
+    </div>
+
+    <div id="registeringModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-cog fa-spin"></i> Registering laptop...</h2>
+            <p class="modal-subtitle">This may take few minutes</p>
+            <div class="progress">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <h2 id="resultTitle"></h2>
+            <p id="resultMessage" class="modal-subtitle"></p>
+            <button onclick="closeResultModal()" class="submit-btn" style="margin-top: 1rem;"><i class="fas fa-check"></i>OK</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Laptop Support System. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function handleSubmit(event) {
+            event.preventDefault();
+            document.getElementById('registeringModal').style.display = 'flex';
+            
+            // Simulate registration process
+            setTimeout(() => {
+                document.getElementById('registeringModal').style.display = 'none';
+                // Random success/failure for demo
+                const success = Math.random() > 0.3;
+                showResult(success);
+            }, 3000);
+        }
+
+        function showResult(success) {
+            const modal = document.getElementById('resultModal');
+            const title = document.getElementById('resultTitle');
+            const message = document.getElementById('resultMessage');
+
+            if (success) {
+                title.innerHTML = '<i class="fas fa-check-circle"></i> Success';
+                message.textContent = "Your laptop has been registered successfully";
+            } else {
+                title.innerHTML = '<i class="fas fa-times-circle"></i> Error';
+                message.textContent = "Failed to register laptop. Please try again later.";
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeResultModal() {
+            document.getElementById('resultModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
