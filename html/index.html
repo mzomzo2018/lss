@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laptop Support System</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/all.min.css">
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #2B3467, #1A1F3D); 
+            --primary-gradient: linear-gradient(135deg, #2B3467, #1A1F3D);
             --secondary-gradient: linear-gradient(135deg, #4E31AA, #2B3467);
             --accent-gradient: linear-gradient(135deg, #BAD7E9, #FCFFE7);
             --text-primary: #FCFFE7;
@@ -245,16 +245,17 @@
             transform: translateZ(10px);
         }
 
-        .progress-bar {
-            height: 100%;
-            background: var(--accent-gradient);
-            border-radius: 4px;
-            animation: progressPulse 2s ease-in-out infinite;
+        @keyframes progressMarquee {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
-        @keyframes progressPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        .progress-bar {
+            height: 100%;
+            width: 50%;
+            background: var(--accent-gradient);
+            border-radius: 4px;
+            animation: progressMarquee 2s linear infinite;
         }
 
         .footer {
@@ -280,11 +281,11 @@
                 flex-direction: column;
                 gap: 1rem;
             }
-            
+
             .info-section {
                 padding: 1rem;
             }
-            
+
             .action-btn {
                 width: 100%;
                 justify-content: center;
@@ -330,7 +331,11 @@
             </div>
             <div class="info-item">
                 <i class="fas fa-desktop"></i>
-                <span id="gpu">GPU</span>
+                <span id="integratedGpu">Integrated GPU</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-desktop"></i>
+                <span id="dedicatedGpu">Dedicated GPU</span>
             </div>
             <div class="info-item">
                 <i class="fas fa-memory"></i>
@@ -356,10 +361,23 @@
     </div>
 
     <div class="action-section">
-        <button class="action-btn optimize-btn" onclick="showOptimizeModal()">
+        <button class="action-btn optimize-btn" onclick="(async () => {
+            document.getElementById('optimizeModal').style.display = 'flex';
+            try {
+                const response = await fetch('http://127.0.0.1:8050/optimize');
+                if (!response.ok) throw new Error('Optimization failed');
+                document.getElementById('optimizeModal').style.display = 'none';
+                showOptimizeResult(true);
+            } catch (error) {
+                document.getElementById('optimizeModal').style.display = 'none';
+                showOptimizeResult(false, error.message);
+            }
+        })()">
             <i class="fas fa-magic"></i> Optimize PC
         </button>
-        <button class="action-btn drivers-btn" onclick="showDriversModal()">
+        <button class="action-btn drivers-btn" onclick="(async () => {
+            window.location.href = 'drivers.html';
+        })()">
             <i class="fas fa-download"></i> Install Drivers
         </button>
     </div>
@@ -379,7 +397,7 @@
         <div class="modal-content">
             <h2 id="optimizeResultTitle"></h2>
             <p id="optimizeResultMessage" class="modal-subtitle"></p>
-            <button onclick="closeOptimizeResultModal()" class="action-btn optimize-btn" style="margin-top: 1rem;">OK</button>
+            <button onclick="document.getElementById('optimizeResultModal').style.display = 'none'" class="action-btn optimize-btn" style="margin-top: 1rem;">OK</button>
         </div>
     </div>
 
@@ -397,7 +415,7 @@
         <div class="modal-content">
             <h2><i class="fas fa-exclamation-circle"></i> PC Not Registered</h2>
             <p class="modal-subtitle">Your PC is not registered in our databases, thus its drivers are not in our server. Please contribute so that we register your PC and upload its drivers to our server</p>
-            <button onclick="closeNotFoundModal()" class="action-btn optimize-btn" style="margin-top: 1rem;">OK</button>
+            <button onclick="document.getElementById('notFoundModal').style.display = 'none'" class="action-btn optimize-btn" style="margin-top: 1rem;">OK</button>
         </div>
     </div>
 
@@ -414,22 +432,16 @@
             document.getElementById('model').textContent = specs.model || '';
             document.getElementById('productionDate').textContent = specs.productionDate || '';
 
-            // Hardware Information  
+            // Hardware Information
             document.getElementById('cpu').textContent = specs.cpu || '';
-            document.getElementById('gpu').textContent = specs.gpu || '';
+            document.getElementById('integratedGpu').textContent = specs.integratedGpu || '';
+            document.getElementById('dedicatedGpu').textContent = specs.dedicatedGpu || '';
             document.getElementById('ram').textContent = specs.ram || '';
             document.getElementById('storage').textContent = specs.storage || '';
 
             // Software Information
             document.getElementById('windowsVersion').textContent = specs.windowsVersion || '';
             document.getElementById('buildVersion').textContent = specs.buildVersion || '';
-        }
-
-        function showOptimizeModal() {
-            document.getElementById('optimizeModal').style.display = 'flex';
-            setTimeout(() => {
-                document.getElementById('optimizeModal').style.display = 'none';
-            }, 3000);
         }
 
         function showOptimizeResult(success, error = "") {
@@ -448,25 +460,12 @@
             modal.style.display = 'flex';
         }
 
-        function closeOptimizeResultModal() {
-            document.getElementById('optimizeResultModal').style.display = 'none';
-        }
-
-        function showDriversModal() {
-            document.getElementById('driversModal').style.display = 'flex';
-            setTimeout(() => {
-                document.getElementById('driversModal').style.display = 'none';
-                // Simulate checking for drivers
-                showNotFoundModal();
-            }, 3000);
+        function closeDriversModal() {
+            document.getElementById('driversModal').style.display = 'none';
         }
 
         function showNotFoundModal() {
             document.getElementById('notFoundModal').style.display = 'flex';
-        }
-
-        function closeNotFoundModal() {
-            document.getElementById('notFoundModal').style.display = 'none';
         }
     </script>
 </body>

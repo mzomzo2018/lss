@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Driver Installation</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/all.min.css">
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #2B3467, #1A1F3D);
@@ -287,90 +287,155 @@
         </div>
     </div>
 
+    <div id="detectingModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-search fa-spin"></i> Detecting Drivers</h2>
+            <p>Please wait while we scan for available drivers...</p>
+        </div>
+    </div>
+
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-exclamation-circle"></i> Error</h2>
+            <p id="errorMessage"></p>
+            <button onclick="closeErrorModal()" class="action-btn" style="margin-top: 1rem;">OK</button>
+        </div>
+    </div>
+
+    <div id="retrievingModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-database fa-spin"></i> Retrieving Drivers</h2>
+            <p>Please wait while we fetch all available drivers from the database...</p>
+            <div class="progress">
+                <div id="retrievalProgressBar" class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // JavaScript remains the same
-        let isManualMode = true;
+        let selectedDrivers = 0;
         let installationInProgress = false;
         let currentProgress = 0;
-        let selectedDrivers = 0;
+        let isManualMode = false;
         let totalDrivers = 0;
-
-        const driverData = [
-            {
-                icon: 'microchip',
-                name: 'NVIDIA Graphics Driver',
-                currentVersion: '472.12',
-                latestVersion: '528.49',
-                size: 756
-            },
-            {
-                icon: 'wifi',
-                name: 'Intel Wireless Driver',
-                currentVersion: '21.40.5',
-                latestVersion: '22.40.0',
-                size: 125
-            },
-            {
-                icon: 'volume-up',
-                name: 'Realtek Audio Driver',
-                currentVersion: '6.0.9225.1',
-                latestVersion: '6.0.9259.1',
-                size: 478
-            }
-        ];
 
         function createDriverItem(driver) {
             const div = document.createElement('div');
             div.className = 'driver-item';
-            div.onclick = function() { toggleSelection(this); };
+            div.dataset.driverId = driver.id;
+            div.onclick = async function() { 
+                try {
+                    await fetch('http://127.0.0.1:8050/toggleDriver', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            driverId: driver.id,
+                            selected: !this.classList.contains('selected')
+                        })
+                    });
+                    toggleSelection(this);
+                } catch (error) {
+                    showErrorModal('Failed to toggle driver selection');
+                }
+            };
             div.innerHTML = `
-                <i class="fas fa-${driver.icon} driver-icon"></i>
+                <i class="fas fa-${driver.icon || 'microchip'} driver-icon"></i>
                 <div>${driver.name}</div>
-                <div>${driver.currentVersion}</div>
-                <div>${driver.latestVersion}</div>
+                <div>${driver.currentVersion || 'N/A'}</div>
+                <div>${driver.latestVersion || 'N/A'}</div>
                 <div>${driver.size} MB</div>
             `;
             return div;
         }
 
-        function updateDriverList() {
+        function updateDriverList(drivers) {
             const driversList = document.getElementById('driversList');
             const header = driversList.firstElementChild;
             driversList.innerHTML = '';
             driversList.appendChild(header);
 
-            driverData.forEach(driver => {
+            drivers.forEach(driver => {
                 driversList.appendChild(createDriverItem(driver));
             });
 
-            totalDrivers = driverData.length;
+            totalDrivers = drivers.length;
         }
 
-        window.addEventListener('DOMContentLoaded', updateDriverList);
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:8050/detectDrivers');
+                if (!response.ok) throw new Error('Failed to detect drivers');
+                const data = await response.json();
+                if (data.drivers && data.drivers.length > 0) {
+                    updateDriverList(data.drivers);
+                } else {
+                    showErrorModal('No drivers found');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showErrorModal('Failed to detect drivers');
+            }
+        });
 
         function toggleSelection(element) {
             element.classList.toggle('selected');
             selectedDrivers = document.querySelectorAll('.driver-item.selected').length;
         }
 
-        function toggleMode() {
+        function showErrorModal(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorModal').style.display = 'flex';
+        }
+
+        function closeErrorModal() {
+            document.getElementById('errorModal').style.display = 'none';
+        }
+
+        async function toggleMode() {
             isManualMode = !isManualMode;
             const modeBtn = document.getElementById('modeBtn');
             const pageTitle = document.getElementById('pageTitle');
-            const driverItems = document.querySelectorAll('.driver-item:not(:first-child)');
             
             if (isManualMode) {
+                modeBtn.textContent = 'Automatic Installation';
+                pageTitle.textContent = 'All Available Drivers';
+                document.getElementById('retrievingModal').style.display = 'flex';
+                
+                try {
+                    const response = await fetch('http://127.0.0.1:8050/getAllDrivers');
+                    if (!response.ok) throw new Error('Failed to fetch drivers');
+                    const drivers = await response.json();
+                    document.getElementById('retrievingModal').style.display = 'none';
+                    updateDriverList(drivers);
+                } catch (error) {
+                    document.getElementById('retrievingModal').style.display = 'none';
+                    showErrorModal('Failed to load drivers from database');
+                }
+            } else {
                 modeBtn.textContent = 'Manual Installation';
                 pageTitle.textContent = 'Detected Drivers';
-            } else {
-                modeBtn.textContent = 'Automatic Installation';
-                pageTitle.textContent = 'PC Drivers';
+                document.getElementById('detectingModal').style.display = 'flex';
+                
+                try {
+                    const response = await fetch('http://127.0.0.1:8050/detectDrivers');
+                    if (!response.ok) throw new Error('Failed to detect drivers');
+                    const data = await response.json();
+                    document.getElementById('detectingModal').style.display = 'none';
+                    if (data.drivers) {
+                        updateDriverList(data.drivers);
+                    }
+                } catch (error) {
+                    document.getElementById('detectingModal').style.display = 'none';
+                    showErrorModal('Failed to detect drivers');
+                }
             }
         }
 
-        function showConfirmationDialog() {
+        async function showConfirmationDialog() {
             if (selectedDrivers === 0) {
-                alert('Please select at least one driver to install');
+                showErrorModal('Please select at least one driver to install');
                 return;
             }
 
@@ -379,62 +444,112 @@
             let hasBIOSUpdate = false;
 
             selectedItems.forEach(item => {
-                const sizeText = item.lastElementChild.textContent;
-                const size = parseInt(sizeText);
-                totalSize += size;
+                const sizeText = item.querySelector('div:last-child').textContent;
+                const size = parseFloat(sizeText);
+                if (!isNaN(size)) {
+                    totalSize += size;
+                }
                 if (item.textContent.toLowerCase().includes('bios')) {
                     hasBIOSUpdate = true;
                 }
             });
 
-            document.getElementById('totalSize').textContent = totalSize + ' MB';
-            document.getElementById('totalTime').textContent = Math.ceil(totalSize / 100);
-            document.getElementById('biosWarning').style.display = hasBIOSUpdate ? 'block' : 'none';
-            document.getElementById('confirmationModal').style.display = 'flex';
+            try {
+                const response = await fetch('http://127.0.0.1:8050/prepareInstallation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        drivers: Array.from(selectedItems).map(item => item.dataset.driverId),
+                        totalSize: totalSize,
+                        hasBIOSUpdate: hasBIOSUpdate
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to prepare installation');
+
+                document.getElementById('totalSize').textContent = totalSize.toFixed(1) + ' MB';
+                document.getElementById('totalTime').textContent = Math.ceil(totalSize / 100);
+                document.getElementById('biosWarning').style.display = hasBIOSUpdate ? 'block' : 'none';
+                document.getElementById('confirmationModal').style.display = 'flex';
+            } catch (error) {
+                showErrorModal('Failed to prepare installation');
+            }
         }
 
-        function closeConfirmationDialog() {
-            document.getElementById('confirmationModal').style.display = 'none';
+        async function closeConfirmationDialog() {
+            try {
+                await fetch('http://127.0.0.1:8050/cancelPreparation');
+                document.getElementById('confirmationModal').style.display = 'none';
+            } catch (error) {
+                showErrorModal('Failed to cancel preparation');
+            }
         }
 
-        function proceedWithInstallation() {
+        async function proceedWithInstallation() {
             closeConfirmationDialog();
-            startInstallation();
+            try {
+                const response = await fetch('http://127.0.0.1:8050/startInstallation');
+                if (response.ok) {
+                    startInstallation();
+                } else {
+                    throw new Error('Failed to start installation');
+                }
+            } catch (error) {
+                showErrorModal('Failed to start installation');
+            }
         }
 
-        function startInstallation() {
+        async function startInstallation() {
             installationInProgress = true;
             document.getElementById('installModal').style.display = 'flex';
             currentProgress = 0;
             updateProgress();
         }
 
-        function updateProgress() {
+        async function updateProgress() {
             if (!installationInProgress) return;
             
-            currentProgress++;
-            const progressBar = document.getElementById('progressBar');
-            const progressText = document.getElementById('progressText');
-            const statusText = document.getElementById('statusText');
-            const driversToInstall = selectedDrivers;
-            
-            progressBar.style.width = `${(currentProgress / driversToInstall) * 100}%`;
-            progressText.textContent = `${currentProgress} of ${driversToInstall} installed`;
-            
-            if (currentProgress < driversToInstall) {
-                statusText.textContent = `Status: Installing driver ${currentProgress + 1}`;
-                setTimeout(updateProgress, 2000);
-            } else {
-                statusText.textContent = 'Status: Installation complete';
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1000);
+            try {
+                const response = await fetch('http://127.0.0.1:8050/installationProgress');
+                if (!response.ok) throw new Error('Failed to fetch progress');
+                
+                const data = await response.json();
+                currentProgress = data.progress;
+                
+                const progressBar = document.getElementById('progressBar');
+                const progressText = document.getElementById('progressText');
+                const statusText = document.getElementById('statusText');
+                
+                progressBar.style.width = `${(currentProgress / selectedDrivers) * 100}%`;
+                progressText.textContent = `${currentProgress} of ${selectedDrivers} installed`;
+                
+                if (currentProgress < selectedDrivers) {
+                    statusText.textContent = `Status: Installing driver ${currentProgress + 1}`;
+                    setTimeout(updateProgress, 2000);
+                } else {
+                    statusText.textContent = 'Status: Installation complete';
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                }
+            } catch (error) {
+                showErrorModal('Failed to update installation progress');
+                installationInProgress = false;
             }
         }
 
-        function cancelInstallation() {
-            installationInProgress = false;
-            document.getElementById('installModal').style.display = 'none';
+        async function cancelInstallation() {
+            try {
+                const response = await fetch('http://127.0.0.1:8050/cancelInstallation');
+                if (!response.ok) throw new Error('Failed to cancel installation');
+                
+                installationInProgress = false;
+                document.getElementById('installModal').style.display = 'none';
+            } catch (error) {
+                showErrorModal('Failed to cancel installation');
+            }
         }
     </script>
 </body>

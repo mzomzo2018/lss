@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laptop Registration</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/all.min.css">
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #2B3467, #1A1F3D);
@@ -396,8 +396,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-desktop"></i> GPU</label>
+                    <label><i class="fas fa-desktop"></i> Integrated GPU</label>
                     <input type="text" id="gpu" required>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-desktop"></i> Dedicated GPU</label>
+                    <input type="text" id="dedicatedGpu">
                 </div>
 
                 <div class="form-group">
@@ -438,17 +443,45 @@
     </footer>
 
     <script>
-        function handleSubmit(event) {
+        async function handleSubmit(event) {
             event.preventDefault();
             document.getElementById('registeringModal').style.display = 'flex';
             
-            // Simulate registration process
-            setTimeout(() => {
+            const formData = {
+                ownerName: document.getElementById('ownerName').value,
+                ownerEmail: document.getElementById('ownerEmail').value,
+                manufacturer: document.getElementById('manufacturer').value,
+                modelFamily: document.getElementById('modelFamily').value,
+                model: document.getElementById('model').value,
+                serialNumber: document.getElementById('serialNumber').value,
+                manufactureDate: document.getElementById('manufactureDate').value,
+                cpu: document.getElementById('cpu').value,
+                gpu: document.getElementById('gpu').value,
+                dedicatedGpu: document.getElementById('dedicatedGpu').value,
+                ram: document.getElementById('ram').value,
+                storage: document.getElementById('storage').value
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:8050/registerLaptop', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
                 document.getElementById('registeringModal').style.display = 'none';
-                // Random success/failure for demo
-                const success = Math.random() > 0.3;
-                showResult(success);
-            }, 3000);
+
+                if (response.ok) {
+                    showResult(true);
+                } else {
+                    showResult(false);
+                }
+            } catch (error) {
+                document.getElementById('registeringModal').style.display = 'none';
+                showResult(false);
+            }
         }
 
         function showResult(success) {
@@ -469,6 +502,24 @@
 
         function closeResultModal() {
             document.getElementById('resultModal').style.display = 'none';
+        }
+
+        function autofillForm(laptopInfo) {
+            // Fill manufacturer info
+            document.getElementById('manufacturer').value = laptopInfo.manufacturer.toLowerCase();
+            document.getElementById('modelFamily').value = laptopInfo.modelFamily || '';
+            document.getElementById('model').value = laptopInfo.model || '';
+            
+            // Fill hardware info
+            document.getElementById('cpu').value = laptopInfo.cpu || '';
+            document.getElementById('gpu').value = laptopInfo.gpu || '';
+            document.getElementById('dedicatedGpu').value = laptopInfo.dedicatedGpu || '';
+            document.getElementById('ram').value = laptopInfo.ram || '';
+            document.getElementById('storage').value = laptopInfo.storage || '';
+            
+            // Set current date as manufacturing date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('manufactureDate').value = today;
         }
     </script>
 </body>
