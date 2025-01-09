@@ -219,54 +219,77 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(26, 31, 61, 0.8);
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
             backdrop-filter: blur(8px);
-            z-index: 1000;
             perspective: 1000px;
         }
 
         .modal-content {
             background: var(--card-bg);
-            padding: 3rem;
+            padding: 2.5rem;
             border-radius: 20px;
-            width: 90%;
+            text-align: center;
             max-width: 500px;
-            border: 1px solid rgba(186, 215, 233, 0.1);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            animation: modalPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 90%;
+            animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: var(--text-primary);
+            backdrop-filter: blur(10px);
             transform-style: preserve-3d;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
         }
 
         @keyframes modalPop {
-            0% { transform: scale(0.5) rotateX(-30deg); opacity: 0; }
-            100% { transform: scale(1) rotateX(0); opacity: 1; }
+            from { 
+                transform: scale(0.8) rotateX(-30deg);
+                opacity: 0;
+            }
+            to { 
+                transform: scale(1) rotateX(0);
+                opacity: 1;
+            }
         }
 
         .progress {
-            height: 8px;
-            background: rgba(186, 215, 233, 0.1);
-            border-radius: 4px;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
             overflow: hidden;
-            margin-top: 2rem;
+            margin: 1.5rem 0;
             transform: translateZ(10px);
-        }
-
-        @keyframes progressMarquee {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
         }
 
         .progress-bar {
             height: 100%;
-            width: 50%;
+            width: 100%;
             background: var(--accent-gradient);
-            border-radius: 4px;
-            animation: progressMarquee 2s linear infinite;
+            animation: progress 2s linear infinite;
+            transform-origin: left;
+        }
+
+        @keyframes progress {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .warning-text {
+            color: #ff6b6b;
+            font-weight: bold;
+            margin: 1.5rem 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
         .footer {
             background: var(--primary-gradient);
-            padding: 1.5rem;
+            padding: 1.25rem;
             text-align: center;
             position: absolute;
             bottom: 0;
@@ -418,12 +441,33 @@
     <div id="notFoundModal" class="modal">
         <div class="modal-content">
             <h2><i class="fas fa-exclamation-circle"></i> PC Not Registered</h2>
-            <p class="modal-subtitle">Your PC is not registered in our databases, thus its drivers are not in our server. Please contribute so that we register your PC and upload its drivers to our server</p>
+            <p class="modal-subtitle warning-text">Your PC is not registered in our databases, thus its drivers are not in our server. Please contribute so that we register your PC and upload its drivers to our server</p>
             <button onclick="document.getElementById('notFoundModal').style.display = 'none'" class="action-btn optimize-btn" style="margin-top: 1rem;">OK</button>
         </div>
     </div>
 
     <footer class="footer">
+        <div class="action-section">
+            <button class="action-btn optimize-btn" onclick="(async () => {
+                document.getElementById('optimizeModal').style.display = 'flex';
+                try {
+                    const response = await fetch('http://127.0.0.1:8050/optimize');
+                    if (!response.ok) throw new Error('Optimization failed');
+                    document.getElementById('optimizeModal').style.display = 'none';
+                    showOptimizeResult(true);
+                } catch (error) {
+                    document.getElementById('optimizeModal').style.display = 'none';
+                    showOptimizeResult(false, error.message);
+                }
+            })()">
+                <i class="fas fa-magic"></i> Optimize PC
+            </button>
+            <button class="action-btn drivers-btn" onclick="(async () => {
+                window.location.href = 'drivers.html';
+            })()">
+                <i class="fas fa-download"></i> Install Drivers
+            </button>
+        </div>
         <p>&copy; 2024 Laptop Support System. All rights reserved.</p>
     </footer>
 

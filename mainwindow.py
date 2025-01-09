@@ -61,7 +61,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 os.system('net stop bits')
                 os.system('net stop msiserver')
                 os.system('ipconfig /flushdns')
-                os.system('wsreset')
                 
                 self._send_response(200, {'message': 'Optimization completed successfully'})
             except Exception as e:
@@ -72,13 +71,13 @@ class RequestHandler(BaseHTTPRequestHandler):
                 w = wmi.WMI()
                 installed_drivers = w.Win32_PnPSignedDriver()
 
-                conn = sqlite3.connect('drivers.db')
+                conn = sqlite3.connect('laptops.db')
                 cursor = conn.cursor()
 
                 available_drivers = []
                 for installed in installed_drivers:
                     cursor.execute("""
-                        SELECT id, name, version, release_date FROM drivers 
+                        SELECT id, name, version, release_date, device_class FROM drivers 
                         WHERE device_class = ? AND version > ?
                     """, (installed.DeviceClass, installed.DriverVersion))
                     
@@ -88,11 +87,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                         driver.name = newer[1]
                         driver.version = newer[2]
                         driver.release_date = newer[3]
+                        driver.device_class = newer[4]
                         available_drivers.append({
                             'id': newer[0],
                             'name': driver.get_name(),
                             'version': driver.get_version(),
-                            'release_date': driver.get_release_date()
+                            'release_date': driver.get_release_date(),
+                            'install_command': driver.get_install_command(),
+                            'device_class': driver.get_device_class()
                         })
 
                 conn.close()
@@ -100,6 +102,29 @@ class RequestHandler(BaseHTTPRequestHandler):
                     'found': len(available_drivers) > 0,
                     'drivers': available_drivers
                 })
+            except Exception as e:
+                self._send_response(500, {'error': str(e)})
+        elif self.path == '/getAllDrivers':
+            try:
+                conn = sqlite3.connect('laptops.db')
+                cursor = conn.cursor()
+
+                cursor.execute("SELECT id, name, version, release_date, install_command, device_class FROM drivers")
+                all_drivers = cursor.fetchall()
+
+                drivers_list = []
+                for driver in all_drivers:
+                    drivers_list.append({
+                        'id': driver[0],
+                        'name': driver[1],
+                        'version': driver[2],
+                        'release_date': driver[3],
+                        'install_command': driver[4],
+                        'device_class': driver[5]
+                    })
+
+                conn.close()
+                self._send_response(200, {'drivers': drivers_list})
             except Exception as e:
                 self._send_response(500, {'error': str(e)})
         elif self.path == '/installationProgress':
@@ -115,7 +140,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         driver_path = os.path.join('drivers', f"{driver['name']}.exe")
                         
                         if os.path.exists(driver_path):
-                            os.system(f'"{driver_path}" /S')
+                            os.system(driver['install_command'])
                             self.current_progress = (current_driver_index + 1) * progress_per_driver
                     
                     if self.current_progress >= 100:
@@ -135,7 +160,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self._send_response(200, {'progress': 0})
         else:
             try:
-                file_path = os.path.join(os.path.dirname(__file__), 'html', self.path.lstrip('/'))
+                file_path = os.path.join(os.path.dirname(__file__), self.path.lstrip('/')).replace('/', '\\')
                 if os.path.exists(file_path) and os.path.isfile(file_path):
                     mime_type, _ = mimetypes.guess_type(file_path)
                     if mime_type is None:
@@ -165,35 +190,57 @@ class RequestHandler(BaseHTTPRequestHandler):
                     manufacturer TEXT,
                     model_family TEXT,
                     model TEXT,
-                    serial_number TEXT,
                     manufacture_date TEXT,
                     cpu TEXT,
                     gpu TEXT,
                     dedicated_gpu TEXT,
                     ram TEXT,
-                    storage TEXT,
-                    drivers TEXT
+                    storage TEXT
                 )''')
 
                 cursor.execute('''INSERT INTO laptops (
                     owner_name, owner_email, manufacturer, model_family, model,
-                    serial_number, manufacture_date, cpu, gpu, dedicated_gpu,
-                    ram, storage, drivers
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (
+                    manufacture_date, cpu, gpu, dedicated_gpu,
+                    ram, storage
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', (
                     post_data.get('ownerName'),
                     post_data.get('ownerEmail'),
                     post_data.get('manufacturer'),
                     post_data.get('modelFamily'),
                     post_data.get('model'),
-                    post_data.get('serialNumber'),
                     post_data.get('manufactureDate'),
                     post_data.get('cpu'),
                     post_data.get('gpu'),
                     post_data.get('dedicatedGpu'),
                     post_data.get('ram'),
-                    post_data.get('storage'),
-                    json.dumps(post_data.get('drivers', []))
+                    post_data.get('storage')
                 ))
+
+                laptop_id = cursor.lastrowid
+
+                cursor.execute('''CREATE TABLE IF NOT EXISTS drivers (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    laptop_id INTEGER,
+                    name TEXT,
+                    version TEXT,
+                    release_date TEXT,
+                    install_command TEXT,
+                    device_class TEXT,
+                    FOREIGN KEY (laptop_id) REFERENCES laptops (id)
+                )''')
+
+                drivers = post_data.get('drivers', [])
+                for driver in drivers:
+                    cursor.execute('''INSERT INTO drivers (
+                        laptop_id, name, version, release_date, install_command, device_class
+                    ) VALUES (?, ?, ?, ?, ?, ?)''', (
+                        laptop_id,
+                        driver.get('name'),
+                        driver.get('version'),
+                        driver.get('releaseDate'),
+                        driver.get('install_command'),
+                        driver.get('device_class')
+                    ))
 
                 conn.commit()
                 conn.close()
@@ -310,5 +357,5 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     widget = MainWindow()
-    widget.show()
+    widget.showMaximized()
     sys.exit(app.exec())

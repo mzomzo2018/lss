@@ -7,10 +7,13 @@ class Driver:
     name: str
     version: str
     release_date: datetime
+    install_command: str
+    package_size: float
+    device_class: str
+    
 
     def __init__(self):
         pass
-
 
     def get_id(self) -> int:
         return self.id
@@ -23,3 +26,12 @@ class Driver:
 
     def get_release_date(self) -> datetime:
         return self.release_date
+
+    def get_install_command(self) -> str:
+        return self.install_command
+
+    def get_package_size(self) -> float:
+        return self.package_size
+
+    def get_device_class(self) -> str:
+        return self.device_class
