@@ -6,6 +6,11 @@
     <title>Driver Installation</title>
     <link rel="stylesheet" href="css/all.min.css">
     <style>
+        @font-face {
+            font-family: 'MainFont';
+            src: url('additionalFont1.ttf') format('truetype');
+        }
+
         :root {
             --primary-gradient: linear-gradient(135deg, #2B3467, #1A1F3D);
             --secondary-gradient: linear-gradient(135deg, #4E31AA, #2B3467);
@@ -17,7 +22,7 @@
 
         body {
             margin: 0;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'MainFont', sans-serif;
             background: var(--primary-gradient);
             min-height: 100vh;
             padding-bottom: 60px;
@@ -213,9 +218,15 @@
 
         .progress-bar {
             height: 100%;
-            width: 0%;
+            width: 100%;
             background: var(--accent-gradient);
-            transition: width 0.4s ease;
+            animation: progress 2s linear infinite;
+            transform-origin: left;
+        }
+
+        @keyframes progress {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         .warning-text {
@@ -234,7 +245,7 @@
 </head>
 <body>
     <nav class="navbar">
-        <a href="index.html" class="back-btn">
+        <a href="javascript:history.back()" class="back-btn">
             <i class="fas fa-arrow-left"></i>
         </a>
         <h1 class="title" id="pageTitle">Detected Drivers</h1>
@@ -244,10 +255,10 @@
         <div class="drivers-list" id="driversList">
             <div class="driver-item">
                 <div></div>
-                <div>Driver Name</div>
-                <div>Current Version</div>
-                <div>Latest Version</div>
-                <div>Package Size</div>
+                <div><i class="fas fa-microchip"></i> Driver Name</div>
+                <div><i class="fas fa-code-branch"></i> Current Version</div>
+                <div><i class="fas fa-arrow-up"></i> Latest Version</div>
+                <div><i class="fas fa-file-archive"></i> Package Size</div>
             </div>
         </div>
 
@@ -339,7 +350,7 @@
                 }
             };
             div.innerHTML = `
-                <i class="fas fa-${driver.icon || 'microchip'} driver-icon"></i>
+                <i class="fas fa-${driver.device_class || 'microchip'} driver-icon"></i>
                 <div>${driver.name}</div>
                 <div>${driver.currentVersion || 'N/A'}</div>
                 <div>${driver.latestVersion || 'N/A'}</div>
@@ -363,17 +374,20 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             try {
+                showDetectingDriversModal();
                 const response = await fetch('http://127.0.0.1:8050/detectDrivers');
-                if (!response.ok) throw new Error('Failed to detect drivers');
+                if (!response.ok) throw new Error(response.statusText);
                 const data = await response.json();
                 if (data.drivers && data.drivers.length > 0) {
                     updateDriverList(data.drivers);
                 } else {
-                    showErrorModal('No drivers found');
+                    showDriversUpToDateModal();
                 }
+                hideDetectingDriversModal();
             } catch (error) {
                 console.error('Error:', error);
-                showErrorModal('Failed to detect drivers');
+                showErrorModal('Failed to detect drivers: ' + error.message);
+                hideDetectingDriversModal();
             }
         });
 
@@ -415,18 +429,21 @@
                 modeBtn.textContent = 'Manual Installation';
                 pageTitle.textContent = 'Detected Drivers';
                 document.getElementById('detectingModal').style.display = 'flex';
-                
                 try {
+                    showDetectingDriversModal();
                     const response = await fetch('http://127.0.0.1:8050/detectDrivers');
-                    if (!response.ok) throw new Error('Failed to detect drivers');
+                    if (!response.ok) throw new Error(response.statusText);
                     const data = await response.json();
-                    document.getElementById('detectingModal').style.display = 'none';
-                    if (data.drivers) {
+                    if (data.drivers && data.drivers.length > 0) {
                         updateDriverList(data.drivers);
+                    } else {
+                        showDriversUpToDateModal();
                     }
+                    hideDetectingDriversModal();
                 } catch (error) {
-                    document.getElementById('detectingModal').style.display = 'none';
-                    showErrorModal('Failed to detect drivers');
+                    console.error('Error:', error);
+                    showErrorModal('Failed to detect drivers: ' + error.message);
+                    hideDetectingDriversModal();
                 }
             }
         }
@@ -547,6 +564,36 @@
                 document.getElementById('installModal').style.display = 'none';
             } catch (error) {
                 showErrorModal('Failed to cancel installation');
+            }
+        }
+        function showDetectingDriversModal() {
+            document.getElementById('detectingModal').style.display = 'flex';
+        }
+
+        function hideDetectingDriversModal() {
+            document.getElementById('detectingModal').style.display = 'none';
+        }
+
+        function showDriversUpToDateModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h2><i class="fas fa-check-circle"></i> All Drivers Up to Date</h2>
+                    <p>All your drivers are already up to date. No updates are necessary at this time.</p>
+                    <button onclick="closeDriversUpToDateModal()" class="action-btn" style="margin-top: 1rem;">OK</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.querySelector('.action-btn[onclick="showConfirmationDialog()"]').disabled = true;
+        }
+
+        function closeDriversUpToDateModal() {
+            const modal = document.querySelector('.modal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.removeChild(modal);
             }
         }
     </script>

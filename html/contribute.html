@@ -6,6 +6,11 @@
     <title>Laptop Registration</title>
     <link rel="stylesheet" href="css/all.min.css">
     <style>
+        @font-face {
+            font-family: 'AdditionalFont1';
+            src: url('fonts/additionalFont1.ttf') format('truetype');
+        }
+
         :root {
             --primary-gradient: linear-gradient(135deg, #2B3467, #1A1F3D);
             --secondary-gradient: linear-gradient(135deg, #4E31AA, #2B3467);
@@ -17,7 +22,7 @@
 
         body {
             margin: 0;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'AdditionalFont1', sans-serif;
             background: var(--primary-gradient);
             min-height: 100vh;
             padding-bottom: 60px;
@@ -63,7 +68,7 @@
         }
 
         .title {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 600;
             letter-spacing: 0.5px;
             animation: titlePop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -91,7 +96,7 @@
 
         .registration-form {
             background: var(--card-bg);
-            padding: 2.5rem;
+            padding: 3rem;
             border-radius: 20px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             backdrop-filter: blur(10px);
@@ -109,7 +114,7 @@
             text-align: center;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             animation: titleFloat 3s ease-in-out infinite;
-            font-size: 2.2rem;
+            font-size: 2.5rem;
         }
 
         .form-title i {
@@ -137,33 +142,41 @@
             margin-bottom: 0.8rem;
             color: var(--text-secondary);
             text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-            font-size: 1.2rem;
+            font-size: 1.4rem;
         }
 
         .form-group label i {
             margin-right: 8px;
-            font-size: 1.3rem;
+            font-size: 1.5rem;
         }
 
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
-            padding: 1.2rem;
+            padding: 1.5rem;
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.2);
             border-radius: 12px;
             color: var(--text-primary);
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             transition: all 0.3s ease;
-            height: 3.5rem;
+            height: 4rem;
             box-sizing: border-box;
+            font-family: 'AdditionalFont1', sans-serif;
         }
 
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus {
             background: rgba(255,255,255,0.15);
             border-color: var(--text-secondary);
             outline: none;
             transform: translateZ(5px);
-            height: 3.8rem;
+            height: 4.3rem;
+        }
+
+        .form-group select {
+            appearance: none;
+            background: url('icons/arrow-down.svg') no-repeat right 1rem center;
+            background-size: 1.5rem;
+            color: black; /* Set select option color to black */
         }
 
         .form-section {
@@ -175,7 +188,7 @@
         .section-title {
             color: var(--text-secondary);
             margin-bottom: 2rem;
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
@@ -188,18 +201,19 @@
         .submit-btn {
             background: var(--secondary-gradient);
             color: var(--text-primary);
-            padding: 1.2rem 2.5rem;
+            padding: 1.5rem 2.5rem;
             border: none;
             border-radius: 30px;
             cursor: pointer;
             width: 100%;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             transition: all 0.3s ease;
             transform-style: preserve-3d;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-family: 'AdditionalFont1', sans-serif;
         }
 
         .submit-btn i {
@@ -228,7 +242,7 @@
 
         .modal-content {
             background: var(--card-bg);
-            padding: 2.5rem;
+            padding: 3rem;
             border-radius: 20px;
             text-align: center;
             max-width: 600px;
@@ -252,7 +266,7 @@
         .modal-subtitle {
             color: var(--text-secondary);
             margin: 1.2rem 0;
-            font-size: 1.1rem;
+            font-size: 1.3rem;
         }
 
         .progress {
@@ -281,12 +295,64 @@
             background: var(--primary-gradient);
             color: var(--text-primary);
             text-align: center;
-            padding: 1.2rem;
+            padding: 1.5rem;
             position: absolute;
             bottom: 0;
             width: 100%;
             box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
-            font-size: 1.1rem;
+            font-size: 1.3rem;
+        }
+
+        /* Driver Manager Table Styles */
+        #driversTable {
+            width: 100%;
+            margin-top: 2rem;
+            border-collapse: collapse;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        #driversTable th,
+        #driversTable td {
+            padding: 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #driversTable th {
+            background: rgba(255,255,255,0.1);
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        #driversTable tr:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .delete-driver {
+            background: none;
+            border: none;
+            color: #ff4444;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .delete-driver:hover {
+            background: rgba(255,68,68,0.2);
+            transform: scale(1.1);
+        }
+
+        .driver-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .driver-actions button {
+            flex: 1;
         }
     </style>
 </head>
@@ -335,11 +401,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-barcode"></i> Serial Number</label>
-                    <input type="text" id="serialNumber" required>
-                </div>
-
-                <div class="form-group">
                     <label><i class="fas fa-calendar-alt"></i> Manufacturing Date</label>
                     <input type="date" id="manufactureDate" required>
                 </div>
@@ -372,6 +433,10 @@
                     <label><i class="fas fa-hdd"></i> Storage</label>
                     <input type="text" id="storage" required>
                 </div>
+
+                <div class="form-group">
+                    <button type="button" class="submit-btn" onclick="openDriverManager()"><i class="fas fa-cogs"></i> Manage Drivers</button>
+                </div>
             </div>
 
             <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i>Register Laptop</button>
@@ -396,11 +461,125 @@
         </div>
     </div>
 
+    <div id="driverManagerModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-cogs"></i> Driver Manager</h2>
+            <div class="form-group">
+                <label><i class="fas fa-file"></i> Driver Name</label>
+                <input type="text" id="driverName" placeholder="Enter driver name" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-code"></i> Driver Version</label>
+                <input type="text" id="driverVersion" placeholder="e.g., 1.2.3" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-download"></i> Driver Class</label>
+                <select id="deviceClass" required>
+                    <option value="">Select driver class</option>
+                    <option value="audio">Audio</option>
+                    <option value="video">Video</option>
+                    <option value="network">Network</option>
+                    <option value="storage">Storage</option>
+                    <option value="input">Input Device</option>
+                    <option value="chipset">Chipset</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-terminal"></i> Installation Command Line</label>
+                <input type="text" id="installationCommand" placeholder="Enter installation command" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-calendar-alt"></i> Release Date</label>
+                <input type="date" id="releaseDate" required>
+            </div>
+            <div class="driver-actions">
+                <button type="button" class="submit-btn" onclick="addDriver()"><i class="fas fa-plus"></i> Add Driver</button>
+                <button type="button" class="submit-btn" onclick="clearDriverForm()" style="background: var(--primary-gradient);"><i class="fas fa-undo"></i> Clear</button>
+            </div>
+            <table id="driversTable">
+                <thead>
+                    <tr>
+                        <th>Driver Name</th>
+                        <th>Version</th>
+                        <th>Class</th>
+                        <th>Release Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <button type="button" class="submit-btn" onclick="closeDriverManager()" style="margin-top: 2rem;"><i class="fas fa-check"></i> Done</button>
+        </div>
+    </div>
+
     <footer class="footer">
         <p>&copy; 2024 Laptop Support System. All rights reserved.</p>
     </footer>
 
+    <div id="discardChangesModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-exclamation-triangle"></i> Unsaved Changes</h2>
+            <p class="modal-subtitle">You have unsaved changes. Are you sure you want to leave without saving?</p>
+            <div class="driver-actions">
+                <button type="button" class="submit-btn" onclick="discardChanges()"><i class="fas fa-check"></i> Yes, Discard</button>
+                <button type="button" class="submit-btn" onclick="closeDiscardChangesModal()" style="background: var(--primary-gradient);"><i class="fas fa-times"></i> No, Stay</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        let initialFormData = {};
+        let driversList = [];
+        let lastRegisteredData = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            saveInitialFormData();
+            window.addEventListener('beforeunload', (event) => {
+                if (isFormChanged()) {
+                    event.preventDefault();
+                    event.returnValue = '';
+                }
+            });
+        });
+
+        function saveInitialFormData() {
+            initialFormData = {
+                ownerName: document.getElementById('ownerName').value,
+                ownerEmail: document.getElementById('ownerEmail').value,
+                manufacturer: document.getElementById('manufacturer').value,
+                modelFamily: document.getElementById('modelFamily').value,
+                model: document.getElementById('model').value,
+                manufactureDate: document.getElementById('manufactureDate').value,
+                cpu: document.getElementById('cpu').value,
+                gpu: document.getElementById('gpu').value,
+                dedicatedGpu: document.getElementById('dedicatedGpu').value,
+                ram: document.getElementById('ram').value,
+                storage: document.getElementById('storage').value,
+                drivers: JSON.stringify(driversList)
+            };
+        }
+
+        function isFormChanged() {
+            const currentFormData = {
+                ownerName: document.getElementById('ownerName').value,
+                ownerEmail: document.getElementById('ownerEmail').value,
+                manufacturer: document.getElementById('manufacturer').value,
+                modelFamily: document.getElementById('modelFamily').value,
+                model: document.getElementById('model').value,
+                manufactureDate: document.getElementById('manufactureDate').value,
+                cpu: document.getElementById('cpu').value,
+                gpu: document.getElementById('gpu').value,
+                dedicatedGpu: document.getElementById('dedicatedGpu').value,
+                ram: document.getElementById('ram').value,
+                storage: document.getElementById('storage').value,
+                drivers: JSON.stringify(driversList)
+            };
+
+            return JSON.stringify(initialFormData) !== JSON.stringify(currentFormData);
+        }
+
         async function handleSubmit(event) {
             event.preventDefault();
             document.getElementById('registeringModal').style.display = 'flex';
@@ -411,13 +590,13 @@
                 manufacturer: document.getElementById('manufacturer').value,
                 modelFamily: document.getElementById('modelFamily').value,
                 model: document.getElementById('model').value,
-                serialNumber: document.getElementById('serialNumber').value,
                 manufactureDate: document.getElementById('manufactureDate').value,
                 cpu: document.getElementById('cpu').value,
                 gpu: document.getElementById('gpu').value,
                 dedicatedGpu: document.getElementById('dedicatedGpu').value,
                 ram: document.getElementById('ram').value,
-                storage: document.getElementById('storage').value
+                storage: document.getElementById('storage').value,
+                drivers: driversList
             };
 
             try {
@@ -432,6 +611,8 @@
                 document.getElementById('registeringModal').style.display = 'none';
 
                 if (response.ok) {
+                    lastRegisteredData = formData;
+                    saveInitialFormData();
                     showResult(true);
                 } else {
                     showResult(false);
@@ -474,6 +655,122 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('manufactureDate').value = today;
         }
+
+        function openDriverManager() {
+            document.getElementById('driverManagerModal').style.display = 'flex';
+            updateDriversTable();
+        }
+
+        function closeDriverManager() {
+            document.getElementById('driverManagerModal').style.display = 'none';
+            clearDriverForm();
+        }
+
+        function clearDriverForm() {
+            document.getElementById('driverName').value = '';
+            document.getElementById('driverVersion').value = '';
+            document.getElementById('deviceClass').value = '';
+            document.getElementById('installationCommand').value = '';
+            document.getElementById('releaseDate').value = '';
+        }
+
+        function validateDriverInput() {
+            const name = document.getElementById('driverName').value.trim();
+            const version = document.getElementById('driverVersion').value.trim();
+            const type = document.getElementById('deviceClass').value;
+            const command = document.getElementById('installationCommand').value.trim();
+            const releaseDate = document.getElementById('releaseDate').value;
+
+            if (!name || !version || !type || !command || !releaseDate) {
+                showModalDialog('Error', 'Please fill in all driver fields');
+                return false;
+            }
+
+            if (!/^\d+(\.\d+)*$/.test(version)) {
+                showModalDialog('Error', 'Please enter a valid version number (e.g., 1.2.3)');
+                return false;
+            }
+
+            return true;
+        }
+
+        function addDriver() {
+            if (!validateDriverInput()) return;
+
+            const driverName = document.getElementById('driverName').value.trim();
+            const driverVersion = document.getElementById('driverVersion').value.trim();
+            const deviceClass = document.getElementById('deviceClass').value;
+            const installationCommand = document.getElementById('installationCommand').value.trim();
+            const releaseDate = document.getElementById('releaseDate').value;
+
+            const driver = {
+                name: driverName,
+                version: driverVersion,
+                device_class: deviceClass,
+                install_command: installationCommand,
+                release_date: releaseDate
+            };
+
+            driversList.push(driver);
+            updateDriversTable();
+            clearDriverForm();
+        }
+
+        function deleteDriver(index) {
+            driversList.splice(index, 1);
+            updateDriversTable();
+        }
+
+        function updateDriversTable() {
+            const tbody = document.getElementById('driversTable').querySelector('tbody');
+            tbody.innerHTML = '';
+
+            driversList.forEach((driver, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${driver.name}</td>
+                    <td>${driver.version}</td>
+                    <td>${driver.device_class}</td>
+                    <td>${driver.release_date}</td>
+                    <td>
+                        <button class="delete-driver" onclick="deleteDriver(${index})">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function showModalDialog(title, message) {
+            const modal = document.getElementById('resultModal');
+            const modalTitle = document.getElementById('resultTitle');
+            const modalMessage = document.getElementById('resultMessage');
+
+            modalTitle.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${title}`;
+            modalMessage.textContent = message;
+
+            modal.style.display = 'flex';
+        }
+
+        function discardChanges() {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.location.href = 'index.html';
+        }
+
+        function closeDiscardChangesModal() {
+            document.getElementById('discardChangesModal').style.display = 'none';
+        }
+
+        function handleBeforeUnload(event) {
+            if (isFormChanged()) {
+                event.preventDefault();
+                event.returnValue = '';
+                document.getElementById('discardChangesModal').style.display = 'flex';
+            }
+        }
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
     </script>
 </body>
 </html>
