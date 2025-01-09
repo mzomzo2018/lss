@@ -248,9 +248,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self._send_response(200, {'message': 'Laptop registered successfully'})
             except Exception as e:
                 self._send_response(500, {'error': str(e)})
-        elif self.path == '/prepareInstallation':
-            self.selected_drivers = post_data.get('drivers', [])
-            self._send_response(200)
         else:
             self._send_response(404)
 

@@ -468,38 +468,10 @@
                     hasBIOSUpdate = true;
                 }
             });
-
-            try {
-                const response = await fetch('http://127.0.0.1:8050/prepareInstallation', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        drivers: Array.from(selectedItems).map(item => item.dataset.driverId),
-                        totalSize: totalSize,
-                        hasBIOSUpdate: hasBIOSUpdate
-                    })
-                });
-
-                if (!response.ok) throw new Error('Failed to prepare installation');
-
                 document.getElementById('totalSize').textContent = totalSize.toFixed(1) + ' MB';
                 document.getElementById('totalTime').textContent = Math.ceil(totalSize / 100);
                 document.getElementById('biosWarning').style.display = hasBIOSUpdate ? 'block' : 'none';
                 document.getElementById('confirmationModal').style.display = 'flex';
-            } catch (error) {
-                showErrorModal('Failed to prepare installation');
-            }
-        }
-
-        async function closeConfirmationDialog() {
-            try {
-                await fetch('http://127.0.0.1:8050/cancelPreparation');
-                document.getElementById('confirmationModal').style.display = 'none';
-            } catch (error) {
-                showErrorModal('Failed to cancel preparation');
-            }
         }
 
         async function proceedWithInstallation() {
@@ -556,15 +528,7 @@
         }
 
         async function cancelInstallation() {
-            try {
-                const response = await fetch('http://127.0.0.1:8050/cancelInstallation');
-                if (!response.ok) throw new Error('Failed to cancel installation');
-                
-                installationInProgress = false;
-                document.getElementById('installModal').style.display = 'none';
-            } catch (error) {
-                showErrorModal('Failed to cancel installation');
-            }
+
         }
         function showDetectingDriversModal() {
             document.getElementById('detectingModal').style.display = 'flex';
