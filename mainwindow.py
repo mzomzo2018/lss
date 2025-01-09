@@ -21,6 +21,7 @@ from UserDetails import UserDetails
 from Laptop import Laptop
 
 from ui_mainwindow import Ui_MainWindow
+# give me command for install pyside6 : pip install PySide6
 
 
 def format_size(size_bytes):
